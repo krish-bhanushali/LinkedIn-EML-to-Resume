@@ -13,8 +13,8 @@ from bs4 import BeautifulSoup #pip install bs4
 # https://myaccount.google.com/lesssecureapps
 
 host = "imap.gmail.com"
-username = "your email"
-password = 'your key'
+username = "email"
+password = 'key'
 download_folder = "./outputs/"
 
 if not os.path.isdir(download_folder):
@@ -127,19 +127,28 @@ for (uid, message) in messages:
 
 
         
-    try:
+        if(postName == 'Node.js Developer'):
+
         
-        fileName = downloadFile(email_href,postName+'/')
-    
-        writeLogFiles('logs/success.txt',f'\n{count}) Successfully Done For Subject: {subject_of_email}\nlink:{email_href}\npost:{postName}')
-    except Exception as e:
-                    # 
-        print(e)        
-        
-        # except:
-        
-        writeLogFiles('logs/error.txt',f'\n{count}) Error For Subject: {subject_of_email}\nlink:{email_href}\npost:{postName}')          
-        
+            try:
+                
+                fileName = downloadFile(email_href,postName+'/')
+            
+                writeLogFiles('logs/success.txt',f'\n{count}) Successfully Done For Subject: {subject_of_email}\nlink:{email_href}\npost:{postName}')
+            except Exception as e:
+                            # 
+                print(e)        
+                
+                # except:
+                
+                writeLogFiles('logs/error.txt',f'\n{count}) Error For Subject: {subject_of_email}\nlink:{email_href}\npost:{postName}')          
+                
+
+
+
+
+
+       
 
 
 
