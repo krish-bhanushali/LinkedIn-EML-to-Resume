@@ -24,14 +24,15 @@ mail = Imbox(host, username=username, password=password, ssl=True, ssl_context=N
 
 
 #fetch mail you want to parse from last comments
-messages = mail.messages(sent_from='bhanushali123krish@gmail.com',date__on=datetime.date(2022, 2, 12)) # defaults to inbox
+messages = mail.messages(sent_from='nitin26.aajtak@gmail.com',date__gt=datetime.date(2022, 2, 12)) # defaults to inbox
 
 
 def downloadFile(url,directory):
+    Path("./outputs/"+directory).mkdir(parents=True, exist_ok=True)
     filename = request.urlopen(request.Request(url)).info().get_filename()
     
                     
-    request.urlretrieve(url,directory +filename)
+    request.urlretrieve(url,"./outputs/"+directory +filename)
 
     return filename
 
@@ -65,40 +66,80 @@ def getAnchorHref(data):
 
     return data
 
+def getPostApplied(data):
+    allTags = BeautifulSoup(data, 'html.parser')
+    h2 = allTags.find_all("h2")
+    if(len(h2)>0):
+        if(len(h2[0].contents) > 0):
+            postA = getJobPost(h2[0].contents[0])
+            print(postA)
+            return postA
+
+
+def getJobPost(post):
+    return post.split(",")[1][1:]
+    #print(allTags)
+
+def getAnchorNew(data):
+    allTags = BeautifulSoup(data, 'html.parser')
+    
+    
+    
+    #finds all the anchor tags 
+    for anchor in allTags.find_all("a"):
+        
+        if(len(anchor.contents) > 1):
+            #print(anchor.contents[1])
+            all_tds_inside_anchor = anchor.contents[1].find_all("td")
+            if(len(all_tds_inside_anchor)>0):
+                #anchor.contents[1].find_all("td")[0].find_all("a")
+                link_anchor_inside_td = all_tds_inside_anchor[0].find_all("a")
+                if(len(link_anchor_inside_td)>0):
+                    href_inside_anchor = link_anchor_inside_td[0]["href"]
+                    return href_inside_anchor
+           
+   
+
 
 def writeLogFiles(path,data):
 	f = open(path,'a+')
 	f.write(data) # get all .eml files in a list
 
-
+count = 0
 for (uid, message) in messages:
     mail.mark_seen(uid) # optional, mark message as read
     
     print('Parsing Emails')
 
     email_items_html = message.body['html']
-    email_items_html = email_items_html[1:]
-    count = 0
+    #email_items_html = email_items_html[1:]
+
+    subject_of_email = message.subject
+
+    count+=1
     for emailEML in email_items_html:
 
        
-        count+=1
+        
         print(f'Email:{count}')
-        # print(count)
-        try:
-            aTag = getAnchorHref(emailEML)
-            directoryPath = getSetPath(emailEML)
-            beautifulSoupText = BeautifulSoup(aTag, 'html.parser')
-            url = beautifulSoupText.contents[0]['href'];
-            fileName = downloadFile(url,directoryPath+'/')
-            writeLogFiles('logs/success.txt',directoryPath+'/'+fileName+'\n')
-        except:
-                        #         
-            
-            # except:
-            
-            writeLogFiles('logs/error.txt',directoryPath + f'Please Refer email:{count}' + '\n')          
-          
+        email_href = getAnchorNew(emailEML)
+        postName = getPostApplied(emailEML)
+
+
+        
+    try:
+        
+        fileName = downloadFile(email_href,postName+'/')
+    
+        writeLogFiles('logs/success.txt',f'\n{count}) Successfully Done For Subject: {subject_of_email}\nlink:{email_href}\npost:{postName}')
+    except Exception as e:
+                    # 
+        print(e)        
+        
+        # except:
+        
+        writeLogFiles('logs/error.txt',f'\n{count}) Error For Subject: {subject_of_email}\nlink:{email_href}\npost:{postName}')          
+        
 
 
 
