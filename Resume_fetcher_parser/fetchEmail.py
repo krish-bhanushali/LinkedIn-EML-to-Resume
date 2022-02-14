@@ -1,5 +1,26 @@
+#INSTRUCTIONS
+#PLEASE INSTALL FOLLOWING DEPENDENCIES
+#pip install imbox
+#pip install urllib
+#pip install BeautifulSoup4
+
+#pip install certifi
+
+#Please go to My Accounts In Google
+#turn on two step verification
+#generate an app password
+#enter it in place of password
+
+
+
+#GO TO MESSAGEGS OBJECT 
+
 from base64 import encode
 import datetime
+
+
+
+
 
 import os
 from imbox import Imbox # pip install imbox
@@ -9,8 +30,6 @@ from pathlib import Path
 
 from bs4 import BeautifulSoup #pip install bs4
 
-# enable less secure apps on your google account
-# https://myaccount.google.com/lesssecureapps
 
 host = "imap.gmail.com"
 username = "email"
@@ -23,7 +42,45 @@ if not os.path.isdir(download_folder):
 mail = Imbox(host, username=username, password=password, ssl=True, ssl_context=None, starttls=False)
 
 
-#fetch mail you want to parse from last comments
+#fetch type of mail you want to select
+"""
+Available Message filters: 
+
+# Gets all messages from the inbox
+messages = mail.messages()
+
+# Unread messages
+messages = mail.messages(unread=True)
+
+# Flagged messages
+messages = mail.messages(flagged=True)
+
+# Un-flagged messages
+messages = mail.messages(unflagged=True)
+
+# Messages sent FROM
+messages = mail.messages(sent_from='sender@example.org')
+
+# Messages sent TO
+messages = mail.messages(sent_to='receiver@example.org')
+
+# Messages received before specific date
+messages = mail.messages(date__lt=datetime.date(2018, 7, 31))
+
+# Messages received after specific date
+messages = mail.messages(date__gt=datetime.date(2018, 7, 30))
+
+# Messages received on a specific date
+messages = mail.messages(date__on=datetime.date(2018, 7, 30))
+
+# Messages whose subjects contain a string
+messages = mail.messages(subject='Christmas')
+
+# Messages from a specific folder
+messages = mail.messages(folder='Social')
+"""
+
+#bellow mail fetches mail from nitin26aajtak@gmail.com and date after 12/2/2022
 messages = mail.messages(sent_from='nitin26.aajtak@gmail.com',date__gt=datetime.date(2022, 2, 12)) # defaults to inbox
 
 
@@ -119,30 +176,33 @@ for (uid, message) in messages:
     count+=1
     for emailEML in email_items_html:
 
+        try:
        
-        
-        print(f'Email:{count}')
-        email_href = getAnchorNew(emailEML)
-        postName = getPostApplied(emailEML)
-
-
-        
-        if(postName == 'Node.js Developer'):
-
-        
-            try:
-                
-                fileName = downloadFile(email_href,postName+'/')
             
-                writeLogFiles('logs/success.txt',f'\n{count}) Successfully Done For Subject: {subject_of_email}\nlink:{email_href}\npost:{postName}')
-            except Exception as e:
-                            # 
-                print(e)        
+            print(f'Email:{count}')
+            email_href = getAnchorNew(emailEML)
+            postName = getPostApplied(emailEML)
+
+
+            
+            if(postName == 'Node.js Developer'):
+
+            
+                try:
+                    
+                    fileName = downloadFile(email_href,postName+'/')
                 
-                # except:
-                
-                writeLogFiles('logs/error.txt',f'\n{count}) Error For Subject: {subject_of_email}\nlink:{email_href}\npost:{postName}')          
-                
+                    writeLogFiles('logs/success.txt',f'\n=========================\n{count}) Successfully Done For Subject: {subject_of_email}\nlink:{email_href}\npost:{postName}\n=========================\n')
+                except Exception as e:
+                                # 
+                    print(e)        
+                    
+                    # except:
+                    
+                    writeLogFiles('logs/error.txt',f'\n=========================\n{count}) Error {e} For Subject: {subject_of_email}\nlink:{email_href}\npost:{postName}\n=========================\n')          
+
+        except Exception as e: 
+            writeLogFiles('logs/error.txt',f'\n{count}) Error For Subject: {subject_of_email}\n Link may not be found here!')                    
 
 
 
@@ -164,39 +224,3 @@ for (uid, message) in messages:
 mail.logout()
 
 
-"""
-Available Message filters: 
-
-# Gets all messages from the inbox
-messages = mail.messages()
-
-# Unread messages
-messages = mail.messages(unread=True)
-
-# Flagged messages
-messages = mail.messages(flagged=True)
-
-# Un-flagged messages
-messages = mail.messages(unflagged=True)
-
-# Messages sent FROM
-messages = mail.messages(sent_from='sender@example.org')
-
-# Messages sent TO
-messages = mail.messages(sent_to='receiver@example.org')
-
-# Messages received before specific date
-messages = mail.messages(date__lt=datetime.date(2018, 7, 31))
-
-# Messages received after specific date
-messages = mail.messages(date__gt=datetime.date(2018, 7, 30))
-
-# Messages received on a specific date
-messages = mail.messages(date__on=datetime.date(2018, 7, 30))
-
-# Messages whose subjects contain a string
-messages = mail.messages(subject='Christmas')
-
-# Messages from a specific folder
-messages = mail.messages(folder='Social')
-"""
